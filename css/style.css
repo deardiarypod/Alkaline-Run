@@ -390,7 +390,7 @@ body {
 }
 
 .ph-block.moving {
-    animation: moveBlock 4s linear forwards;
+    animation: moveBlock 2.8s linear forwards;
 }
 
 @keyframes moveBlock {
@@ -459,7 +459,7 @@ body {
 
 .ph-block.collectible.moving {
     animation:
-        moveBlock 4s linear forwards,
+        moveBlock 2.8s linear forwards,
         collectibleGlow 0.8s ease-in-out infinite alternate;
 }
 
