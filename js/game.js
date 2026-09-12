@@ -14,12 +14,15 @@ const levelCount = document.getElementById("level-count");
 
 let gameRunning = false;
 let isJumping = false;
-let jumpsCompleted = 0;
+let alkalineCount = 0;
 let spawnTimer = null;
+let animationFrame = null;
 
 
 // ========================================
-// PH BLOCK COLORS
+// PH BLOCKS
+// 9.5 is the collectible
+// Everything else is an obstacle
 // ========================================
 
 const phBlocks = [
@@ -29,7 +32,7 @@ const phBlocks = [
     { ph: "7.0", color: "#32a852" },
     { ph: "8.5", color: "#24a8c7" },
     { ph: "9.0", color: "#2878c8" },
-    { ph: "9.5", color: "#6446b8" }
+    { ph: "9.5", color: "#744cff", collectible: true }
 ];
 
 
@@ -40,25 +43,34 @@ const phBlocks = [
 playButton.addEventListener("click", startGame);
 
 function startGame() {
-
     startScreen.classList.remove("active");
     winScreen.classList.remove("active");
     gameScreen.classList.add("active");
 
     gameRunning = true;
-    jumpsCompleted = 0;
+    alkalineCount = 0;
+    isJumping = false;
 
     levelCount.textContent = "0 / 10";
-
     obstaclesContainer.innerHTML = "";
 
-    spawnObstacle();
+    player.classList.remove("jumping", "rattle", "capture");
 
+    // First block
+    setTimeout(() => {
+        if (gameRunning) {
+            spawnBlock();
+        }
+    }, 900);
+
+    // Continue spawning blocks
     spawnTimer = setInterval(() => {
         if (gameRunning) {
-            spawnObstacle();
+            spawnBlock();
         }
-    }, 2300);
+    }, 2200);
+
+    checkCollisions();
 }
 
 
@@ -67,13 +79,11 @@ function startGame() {
 // ========================================
 
 function jump() {
-
     if (!gameRunning || isJumping) {
         return;
     }
 
     isJumping = true;
-
     player.classList.add("jumping");
 
     setTimeout(() => {
@@ -83,13 +93,12 @@ function jump() {
 }
 
 
-// Tap anywhere on the game screen to jump
+// Tap anywhere during gameplay
 gameScreen.addEventListener("pointerdown", jump);
 
 
-// Keyboard support for testing on computer
+// Keyboard support for computer testing
 document.addEventListener("keydown", (event) => {
-
     if (
         event.code === "Space" ||
         event.code === "ArrowUp"
@@ -104,53 +113,159 @@ document.addEventListener("keydown", (event) => {
 // CREATE PH BLOCK
 // ========================================
 
-function spawnObstacle() {
-
+function spawnBlock() {
     if (!gameRunning) {
         return;
     }
 
-    const blockData =
-        phBlocks[Math.floor(Math.random() * phBlocks.length)];
+    /*
+       Give 9.5 a slightly higher chance of appearing
+       so the birthday game doesn't take forever.
+    */
+
+    let blockData;
+
+    if (Math.random() < 0.32) {
+        blockData = phBlocks.find(block => block.ph === "9.5");
+    } else {
+        const obstacleBlocks =
+            phBlocks.filter(block => block.ph !== "9.5");
+
+        blockData =
+            obstacleBlocks[
+                Math.floor(Math.random() * obstacleBlocks.length)
+            ];
+    }
 
     const block = document.createElement("div");
 
     block.classList.add("ph-block");
+    block.dataset.ph = blockData.ph;
+    block.dataset.collectible =
+        blockData.collectible ? "true" : "false";
+
+    block.dataset.processed = "false";
 
     block.textContent = blockData.ph;
     block.style.backgroundColor = blockData.color;
 
+    if (blockData.collectible) {
+        block.classList.add("collectible");
+    }
+
     obstaclesContainer.appendChild(block);
 
-    // Give CSS time to place the block
     requestAnimationFrame(() => {
         block.classList.add("moving");
     });
 
-    // Count this obstacle after it passes the player
+    // Remove after it travels off screen
     setTimeout(() => {
-
-        if (!gameRunning) {
+        if (block.parentNode) {
             block.remove();
+        }
+    }, 4300);
+}
+
+
+// ========================================
+// COLLISION DETECTION
+// ========================================
+
+function checkCollisions() {
+    if (!gameRunning) {
+        return;
+    }
+
+    const playerRect = player.getBoundingClientRect();
+
+    const blocks =
+        document.querySelectorAll(".ph-block");
+
+    blocks.forEach(block => {
+        if (block.dataset.processed === "true") {
             return;
         }
 
-        jumpsCompleted++;
+        const blockRect =
+            block.getBoundingClientRect();
 
-        if (jumpsCompleted > 10) {
-            jumpsCompleted = 10;
+        const touching =
+            playerRect.left < blockRect.right &&
+            playerRect.right > blockRect.left &&
+            playerRect.top < blockRect.bottom &&
+            playerRect.bottom > blockRect.top;
+
+        if (touching) {
+            block.dataset.processed = "true";
+
+            if (block.dataset.collectible === "true") {
+                captureAlkaline(block);
+            } else {
+                hitObstacle(block);
+            }
         }
+    });
 
-        levelCount.textContent =
-            `${jumpsCompleted} / 10`;
+    animationFrame =
+        requestAnimationFrame(checkCollisions);
+}
 
+
+// ========================================
+// CAPTURE 9.5
+// ========================================
+
+function captureAlkaline(block) {
+    alkalineCount++;
+
+    if (alkalineCount > 10) {
+        alkalineCount = 10;
+    }
+
+    levelCount.textContent =
+        `${alkalineCount} / 10`;
+
+    // Flash / pop the bottle
+    player.classList.remove("capture");
+
+    void player.offsetWidth;
+
+    player.classList.add("capture");
+
+    // Remove collected block immediately
+    block.classList.remove("moving");
+    block.classList.add("collected");
+
+    setTimeout(() => {
         block.remove();
+    }, 180);
 
-        if (jumpsCompleted >= 10) {
+    if (alkalineCount >= 10) {
+        setTimeout(() => {
             winGame();
-        }
+        }, 450);
+    }
+}
 
-    }, 4000);
+
+// ========================================
+// HIT WRONG PH BLOCK
+// ========================================
+
+function hitObstacle(block) {
+    // No points gained or lost.
+    // Bottle simply rattles.
+
+    player.classList.remove("rattle");
+
+    void player.offsetWidth;
+
+    player.classList.add("rattle");
+
+    setTimeout(() => {
+        player.classList.remove("rattle");
+    }, 350);
 }
 
 
@@ -159,10 +274,14 @@ function spawnObstacle() {
 // ========================================
 
 function winGame() {
+    if (!gameRunning) {
+        return;
+    }
 
     gameRunning = false;
 
     clearInterval(spawnTimer);
+    cancelAnimationFrame(animationFrame);
 
     obstaclesContainer.innerHTML = "";
 
@@ -178,7 +297,6 @@ function winGame() {
 // ========================================
 
 function createConfetti() {
-
     const confettiContainer =
         document.getElementById("confetti");
 
@@ -194,8 +312,8 @@ function createConfetti() {
     ];
 
     for (let i = 0; i < 70; i++) {
-
-        const piece = document.createElement("span");
+        const piece =
+            document.createElement("span");
 
         piece.classList.add("confetti-piece");
 
@@ -203,7 +321,11 @@ function createConfetti() {
             Math.random() * 100 + "%";
 
         piece.style.backgroundColor =
-            colors[Math.floor(Math.random() * colors.length)];
+            colors[
+                Math.floor(
+                    Math.random() * colors.length
+                )
+            ];
 
         piece.style.animationDelay =
             Math.random() * 1.5 + "s";
