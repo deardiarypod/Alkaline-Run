@@ -164,7 +164,7 @@ function spawnBlock() {
         if (block.parentNode) {
             block.remove();
         }
-    }, 4300);
+    }, 3100);
 }
 
 
