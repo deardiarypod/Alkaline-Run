@@ -61,7 +61,7 @@ body {
             rgba(10, 2, 20, 0.12),
             rgba(10, 2, 20, 0.28)
         ),
-        url("../assets/images/background-start.jpg");
+        url("../assets/images/background-start.png");
 
     background-size: cover;
     background-position: center;
@@ -175,7 +175,7 @@ body {
             rgba(5, 2, 18, 0.04),
             rgba(5, 2, 18, 0.16)
         ),
-        url("../assets/images/background-game.jpg");
+        url("../assets/images/background-game.png");
 
     background-size: cover;
     background-position: center;
@@ -260,7 +260,7 @@ body {
             rgba(10, 2, 25, 0.32),
             rgba(10, 2, 25, 0.48)
         ),
-        url("../assets/images/background-start.jpg");
+        url("../assets/images/background-start.png");
 
     background-size: cover;
     background-position: center;
