@@ -334,7 +334,7 @@ body {
 ======================================== */
 
 #player.jumping {
-    animation: playerJump 0.7s ease-out;
+    animation: playerJump 0.9s ease-out;
 }
 
 @keyframes playerJump {
@@ -342,12 +342,12 @@ body {
         transform: translateY(0) rotate(0deg);
     }
 
-    45% {
-        transform: translateY(-150px) rotate(5deg);
+    35% {
+        transform: translateY(-165px) rotate(5deg);
     }
 
-    55% {
-        transform: translateY(-150px) rotate(5deg);
+    65% {
+        transform: translateY(-165px) rotate(5deg);
     }
 
     100% {
