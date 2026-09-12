@@ -232,6 +232,9 @@ function captureAlkaline(block) {
     void player.offsetWidth;
 
     player.classList.add("capture");
+    setTimeout(() => {
+        player.classList.remove("capture");
+    }, 300);
 
     // Remove collected block immediately
     block.classList.remove("moving");
