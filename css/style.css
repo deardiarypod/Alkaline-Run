@@ -327,3 +327,116 @@ body {
 
     z-index: 4;
 }
+
+
+/* ========================================
+   PLAYER JUMP
+======================================== */
+
+#player.jumping {
+    animation: playerJump 0.7s ease-out;
+}
+
+@keyframes playerJump {
+    0% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    45% {
+        transform: translateY(-150px) rotate(5deg);
+    }
+
+    55% {
+        transform: translateY(-150px) rotate(5deg);
+    }
+
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+}
+
+
+/* ========================================
+   PH BLOCKS
+======================================== */
+
+.ph-block {
+    position: absolute;
+
+    right: -100px;
+    bottom: 15%;
+
+    width: 62px;
+    height: 62px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 3px solid rgba(255, 255, 255, 0.85);
+    border-radius: 10px;
+
+    color: white;
+
+    font-size: 1rem;
+    font-weight: 900;
+
+    text-shadow:
+        0 2px 3px rgba(0, 0, 0, 0.5);
+
+    box-shadow:
+        0 0 12px rgba(255, 255, 255, 0.45),
+        0 8px 10px rgba(0, 0, 0, 0.35);
+}
+
+.ph-block.moving {
+    animation: moveBlock 4s linear forwards;
+}
+
+@keyframes moveBlock {
+    from {
+        right: -100px;
+    }
+
+    to {
+        right: calc(100% + 100px);
+    }
+}
+
+
+/* ========================================
+   CONFETTI
+======================================== */
+
+.confetti-piece {
+    position: absolute;
+
+    top: -30px;
+
+    width: 9px;
+    height: 18px;
+
+    border-radius: 2px;
+
+    animation-name: confettiFall;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}
+
+@keyframes confettiFall {
+    from {
+        transform:
+            translateY(-30px)
+            rotate(0deg);
+
+        opacity: 1;
+    }
+
+    to {
+        transform:
+            translateY(110vh)
+            rotate(720deg);
+
+        opacity: 0.9;
+    }
+}
